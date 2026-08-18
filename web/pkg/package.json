@@ -1,0 +1,16 @@
+{
+  "name": "lw3010ec-core",
+  "type": "module",
+  "description": "Modbus RTU protocol logic for LW-3010EC power supply",
+  "version": "0.2.0",
+  "files": [
+    "lw3010ec_core_bg.wasm",
+    "lw3010ec_core.js",
+    "lw3010ec_core.d.ts"
+  ],
+  "main": "lw3010ec_core.js",
+  "types": "lw3010ec_core.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

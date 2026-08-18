@@ -1,0 +1,23 @@
+[package]
+name = "lw3010ec-core"
+version = "0.2.0"
+edition = "2021"
+description = "Modbus RTU protocol logic for LW-3010EC power supply"
+license = "MIT"
+repository = "https://bb.p.netpath.ca/ryoung/psu-rs"
+keywords = ["modbus", "power-supply", "serial"]
+categories = ["hardware-support"]
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Always available – needed for wasm-bindgen macros on wasm target
+js-sys = "0.3"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wasm-bindgen = { version = "0.2", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"

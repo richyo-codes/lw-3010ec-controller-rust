@@ -1,0 +1,6 @@
+# Rust build artifacts for both crates.
+/target/
+/lw3010ec-core/target/
+
+# Local REPL state.
+.psu_repl_history

@@ -1,0 +1,17 @@
+[package]
+name = "lw3010ec-controller"
+version = "0.2.0"
+edition = "2021"
+description = "Topshak/Longwei LW-3010EC bench power supply controller"
+license = "MIT"
+repository = "https://bb.p.netpath.ca/ryoung/psu-rs"
+keywords = ["modbus", "power-supply", "serial", "webserial"]
+categories = ["command-line-utilities", "hardware-support"]
+
+[dependencies]
+lw3010ec-core = { version = "0.2.0", path = "lw3010ec-core" }
+serialport = "4.4"
+clap = { version = "4", features = ["derive"] }
+clap_complete = "4"
+anyhow = "1"
+reedline = "0.32"
