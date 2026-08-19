@@ -17,28 +17,30 @@ Rust keeps the Modbus protocol implementation portable: the same core code compi
 Rust 2021 and serial-port access are required (typically membership of the `dialout` group on Linux).
 
 ```bash
-cargo build --release
+./install.sh
 ```
+
+For a development checkout, use `cargo build --release` instead.
 
 ## Command-line usage
 
 ```bash
 # Find candidate serial ports
-cargo run --release -- scan
+lw3010ec-controller scan
 
 # Read output state
-cargo run --release -- --port /dev/ttyUSB0 status
+lw3010ec-controller --port /dev/ttyUSB0 status
 
 # Set a 12.5 V output with a 2 A limit, then enable it
-cargo run --release -- --port /dev/ttyUSB0 set-voltage 12.5
-cargo run --release -- --port /dev/ttyUSB0 set-current 2.0
-cargo run --release -- --port /dev/ttyUSB0 on
+lw3010ec-controller --port /dev/ttyUSB0 set-voltage 12.5
+lw3010ec-controller --port /dev/ttyUSB0 set-current 2.0
+lw3010ec-controller --port /dev/ttyUSB0 on
 
 # Interactive mode
-cargo run --release -- --port /dev/ttyUSB0 repl
+lw3010ec-controller --port /dev/ttyUSB0 repl
 
 # Generate shell completions
-cargo run --release -- completions bash
+lw3010ec-controller completions bash
 ```
 
 Global options:
@@ -61,6 +63,10 @@ Open `http://127.0.0.1:5000`, click **Connect via WebSerial**, and select the PS
 
 The UI shows live voltage, current, output state, power, session energy in Wh, and peak power/current. Enable auto-refresh for continuous consumption tracking.
 
+### GitHub Pages
+
+The GitHub Actions workflow builds the WebAssembly module and deploys this same static UI to GitHub Pages from the repository's default branch. After enabling **Settings → Pages → GitHub Actions**, it is available at `https://<owner>.github.io/<repository>/`. GitHub Pages uses HTTPS, which satisfies WebSerial's secure-context requirement.
+
 ### Rebuilding the browser protocol module
 
 The generated WebAssembly files are committed under `web/pkg/`. Rebuild them after changing `lw3010ec-core`:
@@ -77,6 +83,13 @@ The controller depends on `lw3010ec-core`, so publish the core crate first and t
 cargo publish --manifest-path lw3010ec-core/Cargo.toml
 cargo publish
 ```
+
+## CI artifacts
+
+GitHub Actions verifies formatting, tests, and Clippy on every push and pull request. It also uploads two downloadable workflow artifacts:
+
+- `lw3010ec-controller-linux-x86_64`: release CLI tarball and SHA-256 checksum
+- `lw3010ec-webserial-site`: static WebSerial site with its WebAssembly module
 
 ## Hardware
 
