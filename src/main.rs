@@ -87,7 +87,6 @@ enum Commands {
         #[arg(long, default_value = "web/pkg")]
         out_dir: String,
     },
-
 }
 
 fn main() -> Result<()> {

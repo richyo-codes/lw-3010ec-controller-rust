@@ -1,0 +1,89 @@
+name: Build, test, and publish site artifacts
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Install Linux serial dependencies
+        run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev
+      - run: cargo fmt --all -- --check
+      - run: cargo test --workspace
+      - run: cargo test --manifest-path lw3010ec-core/Cargo.toml
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+  linux:
+    name: Linux CLI artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux serial dependencies
+        run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev
+      - run: cargo build --release --locked
+      - name: Package Linux binary
+        run: |
+          mkdir -p dist
+          cp target/release/lw3010ec-controller dist/
+          tar -C dist -czf dist/lw3010ec-controller-linux-x86_64.tar.gz lw3010ec-controller
+          sha256sum dist/lw3010ec-controller-linux-x86_64.tar.gz > dist/lw3010ec-controller-linux-x86_64.tar.gz.sha256
+          rm dist/lw3010ec-controller
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lw3010ec-controller-linux-x86_64
+          path: dist/
+          if-no-files-found: error
+
+  web:
+    name: WebSerial site artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --locked
+      - run: ./scripts/build-webui.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lw3010ec-webserial-site
+          path: web/
+          if-no-files-found: error
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    needs: web
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/configure-pages@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: lw3010ec-webserial-site
+          path: web/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: web/
+      - id: deployment
+        uses: actions/deploy-pages@v4
